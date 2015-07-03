@@ -12,11 +12,3 @@ namespace Microsoft.Xna.Framework.Graphics {
         }
     }
 }
-
-namespace Microsoft.Xna.Framework.Audio {
-    public static class JSILHelpers {
-        internal static void alBufferData(uint buffer, int format, Array data, int length, uint sampleRate) {
-            throw new NotImplementedException();
-        }
-    }
-}
