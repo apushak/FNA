@@ -43,6 +43,18 @@ namespace Microsoft.Xna.Framework.Utilities
             if (!hasForwardSlash)
                 filePath = ForwardSlashString + filePath;
 
+#if JSIL
+            // FIXME: JSIL does not implement Uri. Do what we can.
+            var parentDirectory = Path.GetDirectoryName(filePath);
+
+            relativeFile = relativeFile.Replace(BackwardSlash, ForwardSlash);
+            while (relativeFile.StartsWith("../")) {
+                parentDirectory = Path.GetDirectoryName(parentDirectory) ?? "";
+                relativeFile = relativeFile.Substring(3);
+            }
+
+            var localPath = Path.Combine(parentDirectory, relativeFile);
+#else
             // Get a uri for filePath using the file:// schema and no host.
             var src = new Uri("file://" + filePath);
 
@@ -51,6 +63,7 @@ namespace Microsoft.Xna.Framework.Utilities
             // The uri now contains the path to the relativeFile with 
             // relative addresses resolved... get the local path.
             var localPath = dst.LocalPath;
+#endif
 
             if (!hasForwardSlash && localPath.StartsWith("/"))
                 localPath = localPath.Substring(1);

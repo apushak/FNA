@@ -21,7 +21,11 @@ namespace Microsoft.Xna.Framework.Content
 	{
 		#region Private Supported File Extensions Variable
 
+#if JSIL
+		static string[] supportedExtensions = new string[] { ".ogg", ".mp3", ".m4a", ".wav" };
+#else
 		static string[] supportedExtensions = new string[] { ".flac", ".ogg" };
+#endif
 
 		#endregion
 
