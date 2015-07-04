@@ -108,7 +108,11 @@ namespace Microsoft.Xna.Framework.Graphics
 					element.VertexAttribPointerType,
 					element.Normalized,
 					VertexStride,
+#if JSIL
+                    (IntPtr)(offset.ToInt32() + element.Offset)
+#else
 					(IntPtr) (offset.ToInt64() + element.Offset)
+#endif
 				);
 			}
 		}
