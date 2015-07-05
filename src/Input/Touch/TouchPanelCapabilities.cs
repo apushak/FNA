@@ -42,7 +42,11 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
 		#region Private Variables
 
+#if JSIL
+		internal bool isConnected;
+#else
 		private bool isConnected;
+#endif
 		private int maximumTouchCount;
 		private bool initialized;
 

@@ -285,6 +285,13 @@ namespace Microsoft.Xna.Framework.Input.Touch
 			Vector2 position,
 			bool isMouse
 		) {
+#if JSIL
+            // HACK: IsConnected is determined statically, but in browsers
+            //  you can't physically detect a touch panel and need to respond
+            //  to the first tap you get instead.
+            capabilities.isConnected = true;
+#endif
+
 			/* Different platforms return different touch identifiers
 			 * based on the specifics of their implementation and the
 			 * system drivers.
