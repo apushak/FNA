@@ -400,6 +400,9 @@ namespace Microsoft.Xna.Framework.Audio
 			int format;
 			if (isADPCM)
 			{
+#if JSIL
+                throw new NotImplementedException("ADPCM-compressed sound data not supported by emscripten");
+#else
 				format = (channels == 2) ?
 					ALEXT.AL_FORMAT_STEREO_MSADPCM_SOFT :
 					ALEXT.AL_FORMAT_MONO_MSADPCM_SOFT;
@@ -408,6 +411,7 @@ namespace Microsoft.Xna.Framework.Audio
 					ALEXT.AL_UNPACK_BLOCK_ALIGNMENT_SOFT,
 					(int) formatParameter
 				);
+#endif
 			}
 			else
 			{
@@ -453,9 +457,22 @@ namespace Microsoft.Xna.Framework.Audio
 				((double) sampleRate)
 			);
 
-			// Set the loop points, if applicable
-			if (loopStart > 0 || loopEnd > 0)
+            // Compute the default loop end point (end of the buffer), because
+            //  some content builders automatically set a loop endpoint here instead of at 0
+            int defaultEndPoint = (bufLen / (bits / 8)) / (int)channels;
+
+            var hasCustomStartPoint = (loopStart > 0);
+            var hasCustomEndPoint = (
+                (loopEnd > loopStart) &&
+                (loopEnd < defaultEndPoint)
+            );
+
+			if (hasCustomStartPoint || hasCustomEndPoint)
 			{
+    			// Set the loop points, if applicable
+#if JSIL
+                throw new NotImplementedException("Custom audio loop points not supported by emscripten");
+#else
 				AL10.alBufferiv(
 					INTERNAL_buffer,
 					ALEXT.AL_LOOP_POINTS_SOFT,
@@ -465,6 +482,7 @@ namespace Microsoft.Xna.Framework.Audio
 						(int) loopEnd
 					}
 				);
+#endif
 			}
 		}
 
