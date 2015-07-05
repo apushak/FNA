@@ -7,19 +7,7 @@
  */
 #endregion
 
-#if !JSIL
-
-#region NO_STREAM_THREAD Option
-// #define NO_STREAM_THREAD
-/* We use a thread to stream Songs specifically, because if the game hangs, the
- * Song needs to keep playing, as Windows Media Player would in XNA4.
- *
- * If you know that won't happen and want to cut out a thread, or you want to
- * use this with XNA4 somehow, you can uncomment this define.
- *
- * -flibit
- */
-#endregion
+#if JSIL
 
 #region Using Statements
 using System;
@@ -144,7 +132,7 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Internal Properties
 
-		// TODO: Track the ov_reads and stream position
+        // TODO: Implement this
 		internal TimeSpan Position
 		{
 			get;
@@ -155,11 +143,11 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			get
 			{
-				return soundStream.Volume;
+				return soundInstance.Volume;
 			}
 			set
 			{
-				soundStream.Volume = value;
+				soundInstance.Volume = value;
 			}
 		}
 
@@ -167,14 +155,8 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Private Variables
 
-		private DynamicSoundEffectInstance soundStream;
-		private Vorbisfile.OggVorbis_File vorbisFile = new Vorbisfile.OggVorbis_File();
-		private byte[] vorbisBuffer = new byte[4096];
-
-#if !NO_STREAM_THREAD
-		private Thread songThread;
-		private bool exitThread;
-#endif
+        private SoundEffect         sound;
+        private SoundEffectInstance soundInstance;
 
 		#endregion
 
@@ -182,42 +164,20 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal Song(string fileName)
 		{
-			Vorbisfile.ov_fopen(fileName, out vorbisFile);
-			Vorbisfile.vorbis_info fileInfo = Vorbisfile.ov_info(
-				ref vorbisFile,
-				0
-			);
-
-			// TODO: ov_comment() -flibit
 			Name = Path.GetFileNameWithoutExtension(fileName);
 			TrackNumber = 0;
-
-			Duration = TimeSpan.FromSeconds(
-				Vorbisfile.ov_time_total(ref vorbisFile, 0)
-			);
 			Position = TimeSpan.Zero;
-
-			soundStream = new DynamicSoundEffectInstance(
-				fileInfo.rate,
-				(AudioChannels) fileInfo.channels
-			);
-
 			IsDisposed = false;
+
+            sound = JSIL.FNAHelpers.DecodeSong(fileName);
+            Duration = sound.Duration;
+            soundInstance = sound.CreateInstance();
 		}
 
 		internal Song(string fileName, int durationMS) : this(fileName)
 		{
-			/* If you got here, you've still got the XNB file! Well done!
-			 * Except if you're running FNA, you're not using the WMA anymore.
-			 * But surely it's the same song, right...?
-			 * Well, consider this a check more than anything. If this bothers
-			 * you, just remove the XNB file and we'll read the OGG straight up.
-			 * -flibit
-			 */
-			if (Math.Abs(Duration.Milliseconds - durationMS) > 1)
-			{
-				throw new Exception("XNB/OGG duration mismatch!");
-			}
+			// HACK: We should check the duration here for a match but
+            //  browser audio decoding is gonna be ~a nightmaaaaaaaaare~
 		}
 
 		~Song()
@@ -236,9 +196,10 @@ namespace Microsoft.Xna.Framework.Media
 			if (disposing)
 			{
 				Stop();
-				soundStream.Dispose();
-				soundStream = null;
-				Vorbisfile.ov_clear(ref vorbisFile);
+				soundInstance.Dispose();
+                sound.Dispose();
+                soundInstance = null;
+                sound = null;
 			}
 			IsDisposed = true;
 		}
@@ -249,46 +210,25 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal void Play()
 		{
-			soundStream.BufferNeeded += QueueBuffer;
-			QueueBuffer(null, null);
-			QueueBuffer(null, null);
-
-#if NO_STREAM_THREAD
-			soundStream.Play();
-#else
-			soundStream.Play(false);
-
-			exitThread = false;
-			songThread = new Thread(SongThread);
-			songThread.IsBackground = true;
-			songThread.Start();
-#endif
+			soundInstance.Play();
 
 			PlayCount += 1;
 		}
 
 		internal void Resume()
 		{
-			soundStream.Resume();
+			soundInstance.Resume();
 		}
 
 		internal void Pause()
 		{
-			soundStream.Pause();
+			soundInstance.Pause();
 		}
 
 		internal void Stop()
 		{
-#if !NO_STREAM_THREAD
-			exitThread = true;
-			if (songThread != null && Thread.CurrentThread != songThread)
-			{
-				songThread.Join();
-			}
-#endif
+			soundInstance.Stop();
 
-			soundStream.Stop();
-			soundStream.BufferNeeded -= QueueBuffer;
 			PlayCount = 0;
 		}
 
@@ -296,75 +236,10 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Internal Event Handler Methods
 
-		internal void QueueBuffer(object sender, EventArgs args)
-		{
-			// Fill a List (ugh) with a series of ov_read blocks.
-			List<byte> totalBuf = new List<byte>();
-			int bs;
-			long len = 0;
-			do
-			{
-				len = Vorbisfile.ov_read(
-					ref vorbisFile,
-					vorbisBuffer,
-					vorbisBuffer.Length,
-					0,
-					2,
-					1,
-					out bs
-				);
-				if (len == vorbisBuffer.Length)
-				{
-					totalBuf.AddRange(vorbisBuffer);
-				}
-				else if (len > 0)
-				{
-					// UGH -flibit
-					byte[] smallBuf = new byte[len];
-					Array.Copy(vorbisBuffer, smallBuf, len);
-					totalBuf.AddRange(smallBuf);
-				}
-			} while (len > 0 && totalBuf.Count < 16384); // 8192 16-bit samples
-
-			// If we're at the end of the file, stop!
-			if (totalBuf.Count == 0)
-			{
-				soundStream.BufferNeeded -= QueueBuffer;
-				OnFinishedPlaying();
-				return;
-			}
-
-			// Send the filled buffer to the stream.
-			soundStream.SubmitBuffer(
-				totalBuf.ToArray(),
-				0,
-				totalBuf.Count
-			);
-		}
-
 		internal void OnFinishedPlaying()
 		{
 			MediaPlayer.OnSongFinishedPlaying(null, null);
 		}
-
-		#endregion
-
-		#region Private Song Update Thread
-
-#if !NO_STREAM_THREAD
-		private void SongThread()
-		{
-			while (!exitThread)
-			{
-				exitThread = !soundStream.Update();
-				if (!exitThread)
-				{
-					// Arbitrarily 1 frame in a 15Hz game -flibit
-					Thread.Sleep(67);
-				}
-			}
-		}
-#endif
 
 		#endregion
 

@@ -1257,7 +1257,7 @@ namespace Microsoft.Xna.Framework.Graphics
             BindVertexBuffer(handle);
 
 #if JSIL
-            JSILHelpers.BufferSubData("ARRAY_BUFFER", elementSizeInBytes, offsetInBytes, data, startIndex, elementCount);
+            FNAHelpers.BufferSubData("ARRAY_BUFFER", elementSizeInBytes, offsetInBytes, data, startIndex, elementCount);
 #else
 			if (options == SetDataOptions.Discard)
 			{
@@ -1295,7 +1295,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
 
 #if JSIL
-            JSILHelpers.BufferSubData("ELEMENT_ARRAY_BUFFER", elementSizeInBytes, offsetInBytes, data, startIndex, elementCount);
+            FNAHelpers.BufferSubData("ELEMENT_ARRAY_BUFFER", elementSizeInBytes, offsetInBytes, data, startIndex, elementCount);
 #else
 			BindIndexBuffer(handle);
 

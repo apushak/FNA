@@ -49,9 +49,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JSIL">
-      <HintPath>..\JSIL\bin\JSIL.dll</HintPath>
-    </Reference>
     <Reference Include="JSIL.Meta">
       <HintPath>..\JSIL\bin\JSIL.Meta.dll</HintPath>
     </Reference>
@@ -92,6 +89,7 @@
     <Compile Include="src\IUpdateable.cs" />
     <Compile Include="src\MathHelper.cs" />
     <Compile Include="src\Matrix.cs" />
+    <Compile Include="src\Media\JSIL\Song.cs" />
     <Compile Include="src\Plane.cs" />
     <Compile Include="src\PlaneIntersectionType.cs" />
     <Compile Include="src\PlayerIndex.cs" />
