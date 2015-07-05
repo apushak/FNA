@@ -139,15 +139,17 @@ namespace Microsoft.Xna.Framework.Media
 			private set;
 		}
 
+        internal float _Volume = 1.0f;
 		internal float Volume
 		{
 			get
 			{
-				return soundInstance.Volume;
+				return _Volume;
 			}
 			set
 			{
-				soundInstance.Volume = value;
+				_Volume = value;
+                JSIL.FNAHelpers.SetSongVolume(audioBuffer, playingSong, _Volume);
 			}
 		}
 
@@ -155,8 +157,10 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Private Variables
 
-        private SoundEffect         sound;
-        private SoundEffectInstance soundInstance;
+        private object audioBuffer;
+        private object playingSong;
+        private bool   decodeIsPending;
+        private bool   playIsPending;
 
 		#endregion
 
@@ -169,15 +173,26 @@ namespace Microsoft.Xna.Framework.Media
 			Position = TimeSpan.Zero;
 			IsDisposed = false;
 
-            sound = JSIL.FNAHelpers.DecodeSong(fileName);
-            Duration = sound.Duration;
-            soundInstance = sound.CreateInstance();
+            decodeIsPending = true;
+            // FIXME: Blech, asynchrony
+            JSIL.FNAHelpers.BeginDecodeSong(fileName, OnDecodeComplete);
 		}
+
+        private void OnDecodeComplete (object audioBuffer, double durationInSeconds) {
+            Duration = TimeSpan.FromSeconds(durationInSeconds);
+
+            this.audioBuffer = audioBuffer;
+            this.decodeIsPending = false;
+
+            if (this.playIsPending)
+                Play();
+        }
 
 		internal Song(string fileName, int durationMS) : this(fileName)
 		{
-			// HACK: We should check the duration here for a match but
-            //  browser audio decoding is gonna be ~a nightmaaaaaaaaare~
+			// HACK: Pre-initialize with the duration from the XNB file, so that we
+            //  have a roughly accurate duration while the decode happens
+            Duration = TimeSpan.FromMilliseconds(durationMS);
 		}
 
 		~Song()
@@ -196,10 +211,8 @@ namespace Microsoft.Xna.Framework.Media
 			if (disposing)
 			{
 				Stop();
-				soundInstance.Dispose();
-                sound.Dispose();
-                soundInstance = null;
-                sound = null;
+                audioBuffer = null;
+                playIsPending = false;
 			}
 			IsDisposed = true;
 		}
@@ -210,24 +223,33 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal void Play()
 		{
-			soundInstance.Play();
+            // FIXME
+            if (playingSong != null)
+                return;
 
-			PlayCount += 1;
+            if (audioBuffer == null) {
+                playIsPending = true;
+                return;
+            }
+
+            playingSong = JSIL.FNAHelpers.PlaySong(audioBuffer, _Volume);
+            playIsPending = false;
+    		PlayCount += 1;
 		}
 
 		internal void Resume()
 		{
-			soundInstance.Resume();
+            JSIL.FNAHelpers.ResumeSong(audioBuffer, playingSong);
 		}
 
 		internal void Pause()
 		{
-			soundInstance.Pause();
+            JSIL.FNAHelpers.PauseSong(audioBuffer, playingSong);
 		}
 
 		internal void Stop()
 		{
-			soundInstance.Stop();
+            JSIL.FNAHelpers.StopSong(audioBuffer, playingSong);
 
 			PlayCount = 0;
 		}

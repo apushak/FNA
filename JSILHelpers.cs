@@ -7,12 +7,34 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace JSIL {
     // these are currently implemented in SampleFNA proxies
+    public delegate void SongDecodeCompleteHandler (object audioBuffer, double lengthInSeconds);
+
     internal static class FNAHelpers {
         internal static void BufferSubData (string p, int elementSizeInBytes, int offsetInBytes, Array data, int startIndex, int elementCount) {
             throw new NotImplementedException();
         }
 
-        internal static SoundEffect DecodeSong (string filename) {
+        internal static void BeginDecodeSong (string filename, SongDecodeCompleteHandler onDecodeComplete) {
+            throw new NotImplementedException();
+        }
+
+        internal static object PlaySong (object audioBuffer, float volume) {
+            throw new NotImplementedException();
+        }
+
+        internal static void PauseSong (object audioBuffer, object playingSong) {
+            throw new NotImplementedException();
+        }
+
+        internal static void ResumeSong (object audioBuffer, object playingSong) {
+            throw new NotImplementedException();
+        }
+
+        internal static void StopSong (object audioBuffer, object playingSong) {
+            throw new NotImplementedException();
+        }
+
+        internal static void SetSongVolume (object audioBuffer, object playingSong, float volume) {
             throw new NotImplementedException();
         }
     }
