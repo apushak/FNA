@@ -178,11 +178,11 @@ namespace Microsoft.Xna.Framework.Media
             JSIL.FNAHelpers.BeginDecodeSong(fileName, OnDecodeComplete);
 		}
 
-        private void OnDecodeComplete (object audioBuffer, double durationInSeconds) {
-            Duration = TimeSpan.FromSeconds(durationInSeconds);
-
+        private void OnDecodeComplete (object audioBuffer) {
             this.audioBuffer = audioBuffer;
             this.decodeIsPending = false;
+
+            Duration = TimeSpan.FromSeconds(JSIL.FNAHelpers.GetSongLength(audioBuffer));
 
             if (this.playIsPending)
                 Play();
