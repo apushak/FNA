@@ -45,17 +45,21 @@ using System.Runtime.InteropServices;
 
 using SDL2;
 
-#if JSIL
-using JSIL;
 using JSIL.Meta;
-using JSIL.Runtime;
-#endif
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
 	internal partial class OpenGLDevice
 	{
+        #region Platform Services
+        private static Fna.FnaPlatform Platform {
+            get {
+                return Fna.FnaPlatform.Platform;
+            }
+        }
+        #endregion
+
 		#region OpenGL Texture Container Class
 
 		public class OpenGLTexture
@@ -123,9 +127,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region OpenGL Vertex Buffer Container Class
+        #region OpenGL Buffer Container Interface
+        public interface IOpenGLBuffer {
+            uint Handle { get; }
+            int BufferSize { get; }
+            GLenum Dynamic { get; }
+        }
+        #endregion
 
-		public class OpenGLVertexBuffer
+        #region OpenGL Vertex Buffer Container Class
+
+        public class OpenGLVertexBuffer : IOpenGLBuffer
 		{
 			public uint Handle
 			{
@@ -177,7 +189,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region OpenGL Index Buffer Container Class
 
-		public class OpenGLIndexBuffer
+		public class OpenGLIndexBuffer : IOpenGLBuffer
 		{
 			public uint Handle
 			{
@@ -191,7 +203,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				private set;
 			}
 
-			public IntPtr BufferSize
+			public int BufferSize
 			{
 				get;
 				private set;
@@ -207,12 +219,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				graphicsDevice.GLDevice.glGenBuffers(1, out handle);
 				Handle = handle;
 				Dynamic = dynamic ? GLenum.GL_STREAM_DRAW : GLenum.GL_STATIC_DRAW;
-				BufferSize = (IntPtr) (indexCount * (elementSize == IndexElementSize.SixteenBits ? 2 : 4));
+				BufferSize = indexCount * (elementSize == IndexElementSize.SixteenBits ? 2 : 4);
 
 				graphicsDevice.GLDevice.BindIndexBuffer(this);
 				graphicsDevice.GLDevice.glBufferData(
 					GLenum.GL_ELEMENT_ARRAY_BUFFER,
-					BufferSize,
+					(IntPtr)BufferSize,
 					IntPtr.Zero,
 					Dynamic
 				);
@@ -1242,9 +1254,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region glSetBufferData Methods
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void SetVertexBufferData<T>(
 			OpenGLVertexBuffer handle,
 			int elementSizeInBytes,
@@ -1256,34 +1266,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		) where T : struct {
             BindVertexBuffer(handle);
 
-#if JSIL
-            FNAHelpers.BufferSubData("ARRAY_BUFFER", elementSizeInBytes, offsetInBytes, data, startIndex, elementCount);
-#else
-			if (options == SetDataOptions.Discard)
-			{
-				glBufferData(
-					GLenum.GL_ARRAY_BUFFER,
-					(IntPtr) handle.BufferSize,
-					IntPtr.Zero,
-					handle.Dynamic
-				);
-			}
-
-			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-			glBufferSubData(
-				GLenum.GL_ARRAY_BUFFER,
-				(IntPtr) offsetInBytes,
-				(IntPtr) (elementSizeInBytes * elementCount),
-				(IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * elementSizeInBytes)
-			);
-
-			dataHandle.Free();            
-#endif
+            Platform.BufferSubData(
+                this, GLenum.GL_ARRAY_BUFFER, options == SetDataOptions.Discard,
+                handle, elementSizeInBytes, offsetInBytes,
+                data, startIndex, elementCount
+            );
         }
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void SetIndexBufferData<T>(
 			OpenGLIndexBuffer handle,
 			int offsetInBytes,
@@ -1292,43 +1282,22 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount,
 			SetDataOptions options
 		) where T : struct {
-			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
-
-#if JSIL
-            FNAHelpers.BufferSubData("ELEMENT_ARRAY_BUFFER", elementSizeInBytes, offsetInBytes, data, startIndex, elementCount);
-#else
 			BindIndexBuffer(handle);
 
-			if (options == SetDataOptions.Discard)
-			{
-				glBufferData(
-					GLenum.GL_ELEMENT_ARRAY_BUFFER,
-					handle.BufferSize,
-					IntPtr.Zero,
-					handle.Dynamic
-				);
-			}
+            int elementSizeInBytes = Marshal.SizeOf(typeof(T));
 
-			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-
-			glBufferSubData(
-				GLenum.GL_ELEMENT_ARRAY_BUFFER,
-				(IntPtr) offsetInBytes,
-				(IntPtr) (elementSizeInBytes * elementCount),
-				(IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * elementSizeInBytes)
-			);
-
-			dataHandle.Free();
-#endif
+            Platform.BufferSubData(
+                this, GLenum.GL_ELEMENT_ARRAY_BUFFER, options == SetDataOptions.Discard,
+                handle, elementSizeInBytes, offsetInBytes,
+                data, startIndex, elementCount
+            );
 		}
 
 		#endregion
 
 		#region glGetBufferData Methods
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void GetVertexBufferData<T>(
 			OpenGLVertexBuffer handle,
 			int offsetInBytes,
@@ -1385,9 +1354,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			glUnmapBuffer(GLenum.GL_ARRAY_BUFFER);
 		}
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void GetIndexBufferData<T>(
 			OpenGLIndexBuffer handle,
 			int offsetInBytes,

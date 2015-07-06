@@ -31,9 +31,17 @@ namespace Microsoft.Xna.Framework
 {
 	class SDL2_GameWindow : GameWindow
 	{
-		#region Public GameWindow Properties
+        #region Platform Services
+        private static Fna.FnaPlatform Platform {
+            get {
+                return Fna.FnaPlatform.Platform;
+            }
+        }
+        #endregion
 
-		[DefaultValue(false)]
+        #region Public GameWindow Properties
+
+        [DefaultValue(false)]
 		public override bool AllowUserResizing
 		{
 			/* FIXME: This change should happen immediately. However, SDL2 does
@@ -182,7 +190,7 @@ namespace Microsoft.Xna.Framework
 			);
 #endif
 
-			string title = MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle();
+            string title = Platform.GetDefaultWindowTitle();
 			INTERNAL_sdlWindow = SDL.SDL_CreateWindow(
 				title,
 				SDL.SDL_WINDOWPOS_CENTERED,

@@ -537,13 +537,13 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		public BufferData glBufferData;
 
-		private delegate void BufferSubData(
+		public delegate void BufferSubData(
 			GLenum target,
 			int offset,
 			int size,
-			byte[] data
+			IntPtr data
 		);
-		private BufferSubData glBufferSubData;
+		public BufferSubData glBufferSubData;
 
 		private delegate IntPtr MapBuffer(GLenum target, GLenum access);
 		private MapBuffer glMapBuffer;
@@ -799,10 +799,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		public delegate void Uniform1i(int location, int v0);
 		public Uniform1i glUniform1i;
 
-		public delegate void Uniform4fv(
+		public unsafe delegate void Uniform4fv(
 			int location,
 			int count,
-			float[] value
+			float * values
 		);
 		public Uniform4fv glUniform4fv;
 

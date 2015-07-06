@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Audio;
 
+#if false
+
 namespace JSIL {
     // these are currently implemented in SampleFNA proxies
     public delegate void SongDecodeCompleteHandler (object audioBuffer);
@@ -47,3 +49,5 @@ namespace JSIL {
         }
     }
 }
+
+#endif

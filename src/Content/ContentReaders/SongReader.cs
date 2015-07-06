@@ -21,11 +21,9 @@ namespace Microsoft.Xna.Framework.Content
 	{
 		#region Private Supported File Extensions Variable
 
-#if JSIL
-		static string[] supportedExtensions = new string[] { ".ogg", ".mp3" };
-#else
+        // FIXME: JSIL only supports ogg (and maybe mp3, depending on the browser),
+        //  but this is probably good enough?
 		static string[] supportedExtensions = new string[] { ".flac", ".ogg" };
-#endif
 
 		#endregion
 

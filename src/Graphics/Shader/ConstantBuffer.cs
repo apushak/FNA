@@ -3,14 +3,20 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-#if JSIL
 using JSIL.Meta;
-#endif 
 
 namespace Microsoft.Xna.Framework.Graphics
 {
     internal partial class ConstantBuffer : GraphicsResource
     {
+        #region Platform Services
+        private static Fna.FnaPlatform Platform {
+            get {
+                return Fna.FnaPlatform.Platform;
+            }
+        }
+        #endregion
+
         private readonly byte[] _buffer;
 
         private readonly int[] _parameters;

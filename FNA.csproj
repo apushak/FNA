@@ -92,6 +92,9 @@
     <Compile Include="src\Media\JSIL\Song.cs" />
     <Compile Include="src\Plane.cs" />
     <Compile Include="src\PlaneIntersectionType.cs" />
+    <Compile Include="src\Platform\Platform.cs" />
+    <Compile Include="src\Platform\JSIL.cs" />
+    <Compile Include="src\Platform\Native.cs" />
     <Compile Include="src\PlayerIndex.cs" />
     <Compile Include="src\Point.cs" />
     <Compile Include="src\Quaternion.cs" />

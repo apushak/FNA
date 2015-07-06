@@ -12,11 +12,6 @@ using System;
 using System.IO;
 
 using OpenAL;
-#if JSIL
-using JSIL;
-using JSIL.Meta;
-using JSIL.Runtime;
-#endif
 #endregion
 
 namespace Microsoft.Xna.Framework.Audio
@@ -24,7 +19,15 @@ namespace Microsoft.Xna.Framework.Audio
 	// http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.audio.soundeffect.aspx
 	public sealed class SoundEffect : IDisposable
 	{
-		#region Public Properties
+        #region Platform Services
+        private static Fna.FnaPlatform Platform {
+            get {
+                return Fna.FnaPlatform.Platform;
+            }
+        }
+        #endregion
+
+        #region Public Properties
 
 		public TimeSpan Duration
 		{
@@ -400,9 +403,8 @@ namespace Microsoft.Xna.Framework.Audio
 			int format;
 			if (isADPCM)
 			{
-#if JSIL
-                throw new NotImplementedException("ADPCM-compressed sound data not supported by emscripten");
-#else
+                Platform.AssertSupported("ADPCM");
+
 				format = (channels == 2) ?
 					ALEXT.AL_FORMAT_STEREO_MSADPCM_SOFT :
 					ALEXT.AL_FORMAT_MONO_MSADPCM_SOFT;
@@ -411,7 +413,6 @@ namespace Microsoft.Xna.Framework.Audio
 					ALEXT.AL_UNPACK_BLOCK_ALIGNMENT_SOFT,
 					(int) formatParameter
 				);
-#endif
 			}
 			else
 			{
@@ -470,9 +471,8 @@ namespace Microsoft.Xna.Framework.Audio
 			if (hasCustomStartPoint || hasCustomEndPoint)
 			{
     			// Set the loop points, if applicable
-#if JSIL
-                throw new NotImplementedException("Custom audio loop points not supported by emscripten");
-#else
+                Platform.AssertSupported("CustomLoopPoints");
+
 				AL10.alBufferiv(
 					INTERNAL_buffer,
 					ALEXT.AL_LOOP_POINTS_SOFT,
@@ -482,7 +482,6 @@ namespace Microsoft.Xna.Framework.Audio
 						(int) loopEnd
 					}
 				);
-#endif
 			}
 		}
 
