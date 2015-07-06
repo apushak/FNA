@@ -7,6 +7,7 @@ using System.Threading;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SDL2;
 
 namespace Fna.Platform {
     internal unsafe class NativePlatform : FnaPlatform {
@@ -71,6 +72,17 @@ namespace Fna.Platform {
             }
         }
 
+        public override void glUniform4fv (
+            OpenGLDevice openGLDevice, int _location, float[] _buffer
+        ) {
+            fixed (float* pBuffer = _buffer) {
+                openGLDevice.glUniform4fv(
+                    _location, _buffer.Length / 4,
+                    pBuffer
+                );
+            }
+        }
+
         public override MonoGameJoystickConfig CreateJoystickConfig (string osConfigFile) {
             var result = new MonoGameJoystickConfig();
             SaveJoystickConfig(result, osConfigFile);
@@ -123,6 +135,10 @@ namespace Fna.Platform {
             //  we should return false to stop spinning
             Thread.Sleep(durationMs);
             return true;
+        }
+
+        public override string GetSDLPlatform () {
+            return SDL.SDL_GetPlatform();
         }
     }
 }

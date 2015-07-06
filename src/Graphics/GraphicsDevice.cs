@@ -1409,12 +1409,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				posFixup[3] *= -1.0f;
 			}
 
-            fixed (float* pPosFixup = posFixup)
-			    GLDevice.glUniform4fv(
-				    posFixupLoc,
-				    1,
-				    pPosFixup
-			    );
+            Fna.FnaPlatform.Platform.glUniform4fv(GLDevice, posFixupLoc, posFixup);
 		}
 
 		#endregion

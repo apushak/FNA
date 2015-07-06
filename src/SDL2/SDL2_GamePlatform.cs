@@ -167,7 +167,7 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Constructor
 
-		public SDL2_GamePlatform(Game game) : base(game, SDL.SDL_GetPlatform())
+		public SDL2_GamePlatform(Game game) : base(game, Fna.FnaPlatform.Platform.GetSDLPlatform())
 		{
 			/* SDL2 might complain if an OS that uses SDL_main has not actually
 			 * used SDL_main by the time you initialize SDL2.

@@ -264,8 +264,9 @@ namespace Microsoft.Xna.Framework.Input
 				result.Append((char) resChar[18]);
 				result.Append((char) resChar[19]);
 			}
-			else if (Game.Instance.Platform.OSVersion.Equals("Windows"))
-			{
+			else if (
+                Game.Instance.Platform.OSVersion.Equals("Windows")
+            ) {
 				bool isXInput = true;
 				foreach (byte b in resChar)
 				{

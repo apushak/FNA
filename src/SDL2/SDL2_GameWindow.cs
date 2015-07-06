@@ -305,6 +305,8 @@ namespace Microsoft.Xna.Framework
 
 		private void INTERNAL_SetIcon(string title)
 		{
+            // FIXME: Do this better?
+
 			string fileIn = String.Empty;
 
 			/* If the game's using SDL2_image, provide the option to use a PNG

@@ -10,6 +10,8 @@ using System.IO;
 
 namespace Fna.Platform {
     internal unsafe class JSILPlatform : FnaPlatform {
+        private object _CachedGLContext = null;
+
         public override string ToString () {
             return "JSIL";
         }
@@ -32,7 +34,10 @@ namespace Fna.Platform {
         }
 
         private dynamic GetWebGLContext () {
-            return Builtins.Global["document"].getElementById("canvas").getContext("webgl");
+            if (_CachedGLContext == null)
+                _CachedGLContext = Builtins.Global["document"].getElementById("canvas").getContext("webgl");
+
+            return _CachedGLContext;
         }
 
         public override void BufferSubData (
@@ -42,17 +47,37 @@ namespace Fna.Platform {
             int elementSizeInBytes, int offsetInBytes, 
             Array data, int startIndex, int elementCount
         ) {
-            // FIXME
-            throw new NotImplementedException();
+            var gl = GetWebGLContext();
+
+            if (discard) {
+				gl.bufferData(
+					(int)buffer,
+					handle.BufferSize,
+					(int)handle.Dynamic
+				);
+			}
+
+            var view = Verbatim.Expression("new Uint8Array($0.buffer, $1, $2)", data, offsetInBytes, elementSizeInBytes * elementCount);
+            gl.bufferSubData((int)buffer, startIndex, view);
         }
 
-        public override void glUniform4fv (
-            OpenGLDevice openGLDevice, int _location, byte[] _buffer
+        public override void glUniform4fv (OpenGLDevice openGLDevice, int _location, byte[] _buffer) {
+            _glUniform4fv(openGLDevice, _location, _buffer);
+        }
+
+        public override void glUniform4fv (OpenGLDevice openGLDevice, int _location, float[] _buffer) {
+            _glUniform4fv(openGLDevice, _location, _buffer);
+        }
+
+        private void _glUniform4fv (
+            OpenGLDevice openGLDevice, int _location, Array _buffer
         ) {
+            var lengthBytes = Buffer.ByteLength(_buffer);
+
             // FIXME: Blech, copy into the emscripten heap
-            using (var packed = new NativePackedArray<float>("sdl2.dll", _buffer.Length / 4))
+            using (var packed = new NativePackedArray<float>("sdl2.dll", lengthBytes / 4))
             fixed (float * pPacked = packed.Array) {
-                Buffer.BlockCopy(_buffer, 0, packed.Array, 0, _buffer.Length);
+                Buffer.BlockCopy(_buffer, 0, packed.Array, 0, lengthBytes);
                 openGLDevice.glUniform4fv(_location, packed.Length / 4, pPacked);
             }
         }
@@ -155,16 +180,15 @@ namespace Fna.Platform {
 
         private class InnerLoopContext {
             public bool IsRunning;
-            public Action<Action> RequestAnimationFrame;
             public Func<bool>     InnerLoopTick;
             public Action         Exit;
+            private dynamic       Window;
             private Action        _RunNextTick;
 
             public InnerLoopContext (
                 Func<bool> innerLoopTick, Action exit
             ) {
                 _RunNextTick = RunNextTick;
-                RequestAnimationFrame = Verbatim.Expression<Action<Action>>("window.requestAnimationFrame");
                 InnerLoopTick = innerLoopTick;
                 Exit = exit;
             }
@@ -172,7 +196,7 @@ namespace Fna.Platform {
             public void RunNextTick () {
                 IsRunning = InnerLoopTick();
                 if (IsRunning)
-                    RequestAnimationFrame(_RunNextTick);
+                    Verbatim.Expression("window.requestAnimationFrame($0)", _RunNextTick);
                 else
                     Exit();
             }
@@ -206,6 +230,12 @@ namespace Fna.Platform {
 
         public override bool TrySleep (int durationMs) {
             return false;
+        }
+
+        public override string GetSDLPlatform () {
+            // HACK: Too much stuff assumes known platform names, let's just pretend to be Windows
+            //  Windows is probably ideal here since the HTML5 GamePad API is XInput-like
+            return "Windows";
         }
     }
 }

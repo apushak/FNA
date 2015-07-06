@@ -34,6 +34,9 @@ namespace Fna {
         public abstract void glUniform4fv (
             OpenGLDevice openGLDevice, int _location, byte[] _buffer
         );
+        public abstract void glUniform4fv (
+            OpenGLDevice openGLDevice, int _location, float[] _buffer
+        );
 
         public abstract MonoGameJoystickConfig CreateJoystickConfig (string osConfigFile);
 
@@ -41,5 +44,6 @@ namespace Fna {
         public abstract string GetTitleContainerLocation ();
         public abstract string GetResolvedLocalPath (string filePath, string relativeFile);
         public abstract bool   TrySleep (int durationMs);
+        public abstract string GetSDLPlatform ();
     }
 }
