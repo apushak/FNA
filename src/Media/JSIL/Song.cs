@@ -16,12 +16,102 @@ using System.IO;
 using System.Threading;
 
 using Microsoft.Xna.Framework.Audio;
+using JSIL;
 #endregion
 
 namespace Microsoft.Xna.Framework.Media
 {
 	public sealed class Song : IEquatable<Song>, IDisposable
 	{
+        private static class WebAudio {
+            internal static object GetALContext() {
+                return Verbatim.Expression("JSIL.PInvoke.GetModule('soft_oal.dll', true).OpenAL.currentContext.ctx");
+            }
+
+            internal static void BeginDecodeSong (string filename, Action<object> onDecodeComplete) {
+                try {
+                    dynamic stream = File.OpenRead(filename);
+                    // HACK: JSIL stores the underlying byte array for the file as a property on the stream
+                    dynamic fileByteArray = stream._buffer;
+                    object fileArrayBuffer = fileByteArray.buffer;
+
+                    dynamic al = GetALContext();
+
+                    al.decodeAudioData(fileArrayBuffer, Verbatim.Expression(
+                        "function (buffer) { System.Console.WriteLine('Song {0} decoding complete', $1); $0(buffer); }",
+                        onDecodeComplete, filename
+                    ));
+
+                    Console.WriteLine("Song {0} decoding started", filename);
+                } catch {
+                    Console.WriteLine("Song {0} decoding failed", filename);
+                    throw;
+                }
+            }
+
+            internal static object PlaySong (object audioBuffer, float volume) {
+                if (audioBuffer == null)
+                    return null;
+
+                dynamic al = GetALContext();
+
+                var gain = al.createGain();
+                gain.gain.value = volume;
+                gain.connect(al.destination);
+
+                var source = al.createBufferSource();
+                source.buffer = audioBuffer;
+                // FIXME
+                source.loop = true;
+                source.connect(gain);
+                source.start();
+
+                return JSIL.Verbatim.Expression(
+                    "{ source: $0, gain: $1 }",
+                    source,
+                    gain
+                );
+            }
+
+            internal static void PauseSong (object audioBuffer, object playingSong) {
+                if ((audioBuffer == null) || (playingSong == null))
+                    return;
+
+                throw new NotImplementedException("Web Audio API cannot pause/resume");
+            }
+
+            internal static void ResumeSong (object audioBuffer, object playingSong) {
+                if ((audioBuffer == null) || (playingSong == null))
+                    return;
+
+                throw new NotImplementedException("Web Audio API cannot pause/resume");
+            }
+
+            internal static void StopSong (object audioBuffer, object playingSong) {
+                if ((audioBuffer == null) || (playingSong == null))
+                    return;
+
+                dynamic ps = playingSong;
+                ps.source.stop();
+            }
+
+            internal static float GetSongLength (object audioBuffer) {
+                if (audioBuffer == null)
+                    return 0.0f;
+
+                dynamic ab = audioBuffer;
+                return (float)(ab.length);
+            }
+
+            internal static void SetSongVolume (object audioBuffer, object playingSong, float volume) {
+                if ((audioBuffer == null) || (playingSong == null))
+                    return;
+
+                dynamic ps = playingSong;
+                ps.gain.gain.value = volume;
+            }
+        }
+
 		#region Public Metadata Properties
 
 		// TODO: vorbis_comment TITLE
@@ -149,7 +239,7 @@ namespace Microsoft.Xna.Framework.Media
 			set
 			{
 				_Volume = value;
-                JSIL.FNAHelpers.SetSongVolume(audioBuffer, playingSong, _Volume);
+                WebAudio.SetSongVolume(audioBuffer, playingSong, _Volume);
 			}
 		}
 
@@ -175,14 +265,14 @@ namespace Microsoft.Xna.Framework.Media
 
             decodeIsPending = true;
             // FIXME: Blech, asynchrony
-            JSIL.FNAHelpers.BeginDecodeSong(fileName, OnDecodeComplete);
+            WebAudio.BeginDecodeSong(fileName, OnDecodeComplete);
 		}
 
         private void OnDecodeComplete (object audioBuffer) {
             this.audioBuffer = audioBuffer;
             this.decodeIsPending = false;
 
-            Duration = TimeSpan.FromSeconds(JSIL.FNAHelpers.GetSongLength(audioBuffer));
+            Duration = TimeSpan.FromSeconds(WebAudio.GetSongLength(audioBuffer));
 
             if (this.playIsPending)
                 Play();
@@ -232,24 +322,24 @@ namespace Microsoft.Xna.Framework.Media
                 return;
             }
 
-            playingSong = JSIL.FNAHelpers.PlaySong(audioBuffer, _Volume);
+            playingSong = WebAudio.PlaySong(audioBuffer, _Volume);
             playIsPending = false;
     		PlayCount += 1;
 		}
 
 		internal void Resume()
 		{
-            JSIL.FNAHelpers.ResumeSong(audioBuffer, playingSong);
+            WebAudio.ResumeSong(audioBuffer, playingSong);
 		}
 
 		internal void Pause()
 		{
-            JSIL.FNAHelpers.PauseSong(audioBuffer, playingSong);
+            WebAudio.PauseSong(audioBuffer, playingSong);
 		}
 
 		internal void Stop()
 		{
-            JSIL.FNAHelpers.StopSong(audioBuffer, playingSong);
+            WebAudio.StopSong(audioBuffer, playingSong);
 
 			PlayCount = 0;
 		}
