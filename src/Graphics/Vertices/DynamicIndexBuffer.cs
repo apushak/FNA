@@ -10,9 +10,7 @@
 #region Using Statements
 using System;
 
-#if JSIL
 using JSIL.Meta;
-#endif
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -74,9 +72,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public SetData Methods
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void SetData<T>(
 			int offsetInBytes,
 			T[] data,
@@ -93,9 +89,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void SetData<T>(
 			T[] data,
 			int startIndex,

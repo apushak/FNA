@@ -12,9 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
-#if JSIL
 using JSIL.Meta;
-#endif
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -59,9 +57,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private DynamicIndexBuffer indexBuffer;
 
 		// Local data stored before buffering to GPU
-#if JSIL
         [JSPackedArray]
-#endif
 		private VertexPositionColorTexture[] vertexInfo;
 		private SpriteInfo[] spriteData;
 

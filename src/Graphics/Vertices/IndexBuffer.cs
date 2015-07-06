@@ -10,9 +10,7 @@
 #region Using Statements
 using System;
 using System.Runtime.InteropServices;
-#if JSIL
 using JSIL.Meta;
-#endif
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -149,9 +147,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public GetData Methods
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void GetData<T>(T[] data) where T : struct
 		{
 			GetData<T>(
@@ -162,9 +158,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void GetData<T>(
 			T[] data,
 			int startIndex,
@@ -178,9 +172,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void GetData<T>(
 			int offsetInBytes,
 			T[] data,
@@ -224,9 +216,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public SetData Methods
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void SetData<T>(T[] data) where T : struct
 		{
 			SetDataInternal<T>(
@@ -238,9 +228,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void SetData<T>(
 			T[] data,
 			int startIndex,
@@ -256,9 +244,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		public void SetData<T>(
 			int offsetInBytes,
 			T[] data,
@@ -279,9 +265,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Master SetData Method
 
-#if JSIL
         [JSAllowPackedArrayArguments]
-#endif
 		protected void SetDataInternal<T>(
 			int offsetInBytes,
 			T[] data,

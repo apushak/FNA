@@ -13,9 +13,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 using SDL2;
-#if JSIL
 using JSIL;
-#endif
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics

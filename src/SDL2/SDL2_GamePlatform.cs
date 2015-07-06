@@ -64,10 +64,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 
-#if JSIL
-using JSIL;
 using JSIL.Meta;
-#endif
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -265,7 +262,7 @@ namespace Microsoft.Xna.Framework
 
 		#region Public GamePlatform Methods
 
-		public void InnerLoop() {
+		internal bool InnerLoopTick() {
 			SDL.SDL_Event evt;
 
 #if !THREADED_GL
@@ -450,30 +447,14 @@ namespace Microsoft.Xna.Framework
 			Keyboard.SetKeys(keys);
 			Game.Tick();
 
-#if JSIL           
-			if (INTERNAL_runApplication) {
-				Builtins.Global["requestAnimationFrame"]((Action)InnerLoop);
-            } else {
-                Game.Exit();
-            }
-#endif
+            return INTERNAL_runApplication;
 		}
 
 		public override void RunLoop()
 		{
 			SDL.SDL_ShowWindow(Window.Handle);
 
-#if JSIL
-			InnerLoop();
-#else
-			while (INTERNAL_runApplication)
-			{
-				InnerLoop();
-			}
-
-			// We out.
-			Game.Exit();
-#endif
+            Fna.FnaPlatform.Platform.InnerLoop(InnerLoopTick, Game.Exit);
         }
 
 		public override void Exit()
