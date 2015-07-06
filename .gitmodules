@@ -10,3 +10,6 @@
 [submodule "lib/Vorbisfile-CS"]
 	path = lib/Vorbisfile-CS
 	url = https://github.com/flibitijibibo/Vorbisfile-CS.git
+[submodule "lib/JSIL.Meta"]
+	path = lib/JSIL.Meta
+	url = https://github.com/sq/JSIL.Meta.git

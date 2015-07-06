@@ -49,9 +49,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JSIL.Meta">
-      <HintPath>..\JSIL\bin\JSIL.Meta.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -411,6 +408,12 @@
     <EmbeddedResource Include="src\Graphics\Effect\Resources\SpriteEffect.ogl.mgfxo">
       <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.SpriteEffect.ogl.mgfxo</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="lib\JSIL.Meta\Meta.csproj">
+      <Project>{37c67c73-1f58-49b8-a39e-768ac88c2447}</Project>
+      <Name>Meta</Name>
+    </ProjectReference>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

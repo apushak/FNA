@@ -46,3 +46,7 @@ _ReSharper*/
 
 #Unix temporary files
 *~
+
+#JSIL files
+*.metaproj
+*.jsillog
