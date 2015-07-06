@@ -1346,7 +1346,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// <summary>
 		/// Activates the Current Vertex/Pixel shader pair into a program.
 		/// </summary>
-		private void ActivateShaderProgram()
+		private unsafe void ActivateShaderProgram()
 		{
 			// Lookup the shader program.
 			ShaderProgram program = programCache.GetProgram(VertexShader, PixelShader);
@@ -1409,11 +1409,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				posFixup[3] *= -1.0f;
 			}
 
-			GLDevice.glUniform4fv(
-				posFixupLoc,
-				1,
-				posFixup
-			);
+            fixed (float* pPosFixup = posFixup)
+			    GLDevice.glUniform4fv(
+				    posFixupLoc,
+				    1,
+				    pPosFixup
+			    );
 		}
 
 		#endregion

@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Fna.Platform {
-    internal class NativePlatform : FnaPlatform {
+    internal unsafe class NativePlatform : FnaPlatform {
         public override string ToString () {
             return "Native SDL2";
         }
@@ -52,27 +52,15 @@ namespace Fna.Platform {
 			dataHandle.Free();
         }
 
-        /*
-#else
-            fixed (byte* bytePtr = _buffer)
-            {
-                // TODO: We need to know the type of buffer float/int/bool
-                // and cast this correctly... else it doesn't work as i guess
-                // GL is checking the type of the uniform.
-
-#if SDL2
-                float[] floatArray = new float[_buffer.Length / 4];
-                Buffer.BlockCopy(_buffer, 0, floatArray, 0, _buffer.Length);
-                Buffer.BlockCopy(_buffer, 0, floatArray, 0, _buffer.Length);
-                device.GLDevice.glUniform4fv(
-                    _location,
-                    floatArray.Length / 4,
-                    floatArray
-                );   
-#else
-                GL.Uniform4(_location, _buffer.Length / 16, (float*)bytePtr);
-#endif
+        public override void glUniform4fv (
+            OpenGLDevice openGLDevice, int _location, byte[] _buffer
+        ) {
+            fixed (byte* pBuffer = _buffer) {
+                openGLDevice.glUniform4fv(
+                    _location, _buffer.Length / 16,
+                    (float*)pBuffer
+                );
             }
-         */
+        }
     }
 }
