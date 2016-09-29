@@ -22,7 +22,7 @@ namespace Fna.Platform {
         }
 
         public override string GetDefaultWindowTitle () {
-            return Verbatim.Expression<string>("document.title");
+            return Builtins.Global["document"].title;
         }
 
         public override int MapJoystickIndex (int index) {
@@ -211,8 +211,7 @@ namespace Fna.Platform {
         }
 
         public override string GetTitleContainerLocation () {
-            // FIXME: Pull the appropriate location out of jsilConfig?
-            return "/bin/JSIL";
+            return "";
         }
 
         public override string GetResolvedLocalPath (string filePath, string relativeFile) {

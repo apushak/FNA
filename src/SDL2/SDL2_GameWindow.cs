@@ -305,42 +305,44 @@ namespace Microsoft.Xna.Framework
 
 		private void INTERNAL_SetIcon(string title)
 		{
+#if !JSIL
             // FIXME: Do this better?
 
-			string fileIn = String.Empty;
+            string fileIn = String.Empty;
 
-			/* If the game's using SDL2_image, provide the option to use a PNG
+            /* If the game's using SDL2_image, provide the option to use a PNG
 			 * instead of a BMP. Nice for anyone who cares about transparency.
 			 * -flibit
 			 */
-			try
-			{
-				fileIn = INTERNAL_GetIconName(title, ".png");
-				if (!String.IsNullOrEmpty(fileIn))
-				{
-					IntPtr icon = SDL_image.IMG_Load(fileIn);
-					SDL.SDL_SetWindowIcon(INTERNAL_sdlWindow, icon);
-					SDL.SDL_FreeSurface(icon);
-					return;
-				}
-			}
-			catch(DllNotFoundException)
-			{
-				// Not that big a deal guys.
-			}
+            try
+            {
+                fileIn = INTERNAL_GetIconName(title, ".png");
+                if (!String.IsNullOrEmpty(fileIn))
+                {
+                    IntPtr icon = SDL_image.IMG_Load(fileIn);
+                    SDL.SDL_SetWindowIcon(INTERNAL_sdlWindow, icon);
+                    SDL.SDL_FreeSurface(icon);
+                    return;
+                }
+            }
+            catch (DllNotFoundException)
+            {
+                // Not that big a deal guys.
+            }
 
-			fileIn = INTERNAL_GetIconName(title, ".bmp");
-			if (!String.IsNullOrEmpty(fileIn))
-			{
-				IntPtr icon = SDL.SDL_LoadBMP(fileIn);
-				SDL.SDL_SetWindowIcon(INTERNAL_sdlWindow, icon);
-				SDL.SDL_FreeSurface(icon);
-			}
-		}
+            fileIn = INTERNAL_GetIconName(title, ".bmp");
+            if (!String.IsNullOrEmpty(fileIn))
+            {
+                IntPtr icon = SDL.SDL_LoadBMP(fileIn);
+                SDL.SDL_SetWindowIcon(INTERNAL_sdlWindow, icon);
+                SDL.SDL_FreeSurface(icon);
+            }
+#endif
+        }
 
-		#endregion
+#endregion
 
-		#region Private Static Icon Filename Method
+#region Private Static Icon Filename Method
 
 		private static string INTERNAL_GetIconName(string title, string extension)
 		{
@@ -389,6 +391,6 @@ namespace Microsoft.Xna.Framework
 			return fileIn;
 		}
 
-		#endregion
+#endregion
 	}
 }

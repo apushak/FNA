@@ -457,21 +457,17 @@ namespace Microsoft.Xna.Framework
 			BeginRun();
 			_gameTimer = Stopwatch.StartNew();
 
-			try
-			{
-				Platform.RunLoop();
-			}
-			catch (Audio.NoAudioHardwareException)
-			{
-				// FIXME: Should we be catching this here? -flibit
-				Platform.ShowRuntimeError(
-					this.Window.Title,
-					"Could not find a suitable audio device. Verify that a sound card is\n" +
-					"installed, and check the driver properties to make sure it is not disabled."
-				);
-			}
+            try
+            {
+                Platform.RunLoop();
+            }
+            catch (Exception e)
+            {
+                // JSIL hack to show stack trace in browser
+                throw new Exception(e.StackTrace, e);
+            }
 
-			EndRun();
+            EndRun();
 			DoExiting();
 		}
 
