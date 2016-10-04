@@ -417,7 +417,10 @@ namespace Microsoft.Xna.Framework
 
 				  // Text Input
 				  else if (evt.type == SDL.SDL_EventType.SDL_TEXTINPUT && !INTERNAL_TextInputSuppress) {
-					string text;
+#if !JSIL
+                    // This crashes JSIL...
+
+                    string text;
 
 					// Based on the SDL2# LPUtf8StrMarshaler
 					unsafe {
@@ -433,6 +436,7 @@ namespace Microsoft.Xna.Framework
 					if (text.Length > 0) {
 						TextInputEXT.OnTextInput(text[0]);
 					}
+#endif
 				}
 
 				  // Quit
@@ -555,9 +559,9 @@ namespace Microsoft.Xna.Framework
 			);
 		}
 
-		#endregion
+#endregion
 
-		#region Internal GamePlatform Methods
+#region Internal GamePlatform Methods
 
 		internal override DisplayMode GetCurrentDisplayMode()
 		{
@@ -617,9 +621,9 @@ namespace Microsoft.Xna.Framework
 			return SDL.SDL_GetNumTouchDevices() > 0;
 		}
 
-		#endregion
+#endregion
 
-		#region Protected GamePlatform Methods
+#region Protected GamePlatform Methods
 
 		protected override void OnIsMouseVisibleChanged()
 		{
@@ -669,9 +673,9 @@ namespace Microsoft.Xna.Framework
 			base.Dispose(disposing);
 		}
 
-		#endregion
+#endregion
 
-		#region Private DisplayMode Methods
+#region Private DisplayMode Methods
 
 		private void INTERNAL_GenerateDisplayModes()
 		{
@@ -705,9 +709,9 @@ namespace Microsoft.Xna.Framework
 			supportedDisplayModes = new DisplayModeCollection(modes);
 		}
 
-		#endregion
+#endregion
 
-		#region Private TextInput Methods
+#region Private TextInput Methods
 
 		private void INTERNAL_TextInputIn(Keys key)
 		{
@@ -779,6 +783,6 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		#endregion
+#endregion
 	}
 }
