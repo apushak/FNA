@@ -323,13 +323,18 @@ namespace Microsoft.Xna.Framework.Input
 
 		private static int AddKeysToArray(uint keys, int offset, Keys[] pressedKeys, int index)
 		{
-			for (int i = 0; i < 32; i += 1)
-			{
-				if ((keys & (1 << i)) != 0)
-				{
-					pressedKeys[index++] = (Keys) (offset + i);
-				}
-			}
+            unchecked
+            {
+                // This cast is needed because mixing uint and ints with bitwise operators breaks JSIL
+                int k = (int)keys;
+                for (int i = 0; i < 32; i += 1)
+                {
+                    if ((k & (1 << i)) != 0)
+                    {
+                        pressedKeys[index++] = (Keys)(offset + i);
+                    }
+                }
+            }
 			return index;
 		}
 

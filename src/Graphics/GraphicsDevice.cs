@@ -957,8 +957,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Bind the index buffer
 			GLDevice.BindIndexBuffer(Indices.Handle);
 
-			// Draw!
-			GLDevice.glDrawElements(
+            // Draw!
+#if JSIL
+            GLDevice.glDrawElements(
 				PrimitiveTypeGL(primitiveType),
 				//minVertexIndex,
 				//minVertexIndex + numVertices - 1,
@@ -967,7 +968,20 @@ namespace Microsoft.Xna.Framework.Graphics
 					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
 					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
 				(startIndex * (shortIndices ? 2 : 4))
-			);
+            );
+#else
+            GLDevice.glDrawRangeElements(
+                PrimitiveTypeGL(primitiveType),
+                minVertexIndex,
+                minVertexIndex + numVertices - 1,
+                GetElementCountArray(primitiveType, primitiveCount),
+                shortIndices ?
+                    OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
+                    OpenGLDevice.GLenum.GL_UNSIGNED_INT,
+                (IntPtr)(startIndex * (shortIndices ? 2 : 4))
+
+            );
+#endif
 		}
 
 		public void DrawInstancedPrimitives(
@@ -1027,9 +1041,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-		#endregion
+#endregion
 
-		#region DrawPrimitives: VertexBuffer, No Indices
+#region DrawPrimitives: VertexBuffer, No Indices
 
 		public void DrawPrimitives(PrimitiveType primitiveType, int vertexStart, int primitiveCount)
 		{
@@ -1062,9 +1076,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-		#endregion
+#endregion
 
-		#region DrawPrimitives: Vertex Arrays, Index Arrays
+#region DrawPrimitives: Vertex Arrays, Index Arrays
 
 		public void DrawUserIndexedPrimitives<T>(
 			PrimitiveType primitiveType,
@@ -1200,9 +1214,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			vbHandle.Free();
 		}
 
-		#endregion
+#endregion
 
-		#region DrawPrimitives: Vertex Arrays, No Indices
+#region DrawPrimitives: Vertex Arrays, No Indices
 
 		public void DrawUserPrimitives<T>(
 			PrimitiveType primitiveType,
@@ -1253,18 +1267,18 @@ namespace Microsoft.Xna.Framework.Graphics
 			vbHandle.Free();
 		}
 
-		#endregion
+#endregion
 
-		#region FNA Extensions
+#region FNA Extensions
 
 		public void SetStringMarkerEXT(string text)
 		{
 			GLDevice.SetStringMarker(text);
 		}
 
-		#endregion
+#endregion
 
-		#region Private XNA->GL Conversion Methods
+#region Private XNA->GL Conversion Methods
 
 		private static int GetElementCountArray(PrimitiveType primitiveType, int primitiveCount)
 		{
@@ -1300,9 +1314,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			throw new ArgumentException("Should be a value defined in PrimitiveType", "primitiveType");
 		}
 
-		#endregion
+#endregion
 
-		#region Private State Flush Methods
+#region Private State Flush Methods
 
 		private void ApplyState()
 		{
@@ -1412,6 +1426,6 @@ namespace Microsoft.Xna.Framework.Graphics
             Fna.FnaPlatform.Platform.glUniform4fv(GLDevice, posFixupLoc, posFixup);
 		}
 
-		#endregion
+#endregion
 	}
 }

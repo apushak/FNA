@@ -8,7 +8,7 @@
 #endregion
 
 #region DISABLE_FAUXBACKBUFFER Option
-#define DISABLE_FAUXBACKBUFFER
+//#define DISABLE_FAUXBACKBUFFER
 /* If you want to debug GL without the extra FBO in your way, you can use this.
  * Additionally, if you always use the desktop resolution in fullscreen mode,
  * you can use this to optimize your game and even lower the GL requirements.
@@ -1007,11 +1007,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glFrontFace"),
 					typeof(FrontFace)
 				);
-				/*glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
+#if !JSIL
+                glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glPolygonMode"),
 					typeof(PolygonMode)
-				);*/
-				glPolygonOffset = (PolygonOffset) Marshal.GetDelegateForFunctionPointer(
+				);
+#endif
+                glPolygonOffset = (PolygonOffset) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glPolygonOffset"),
 					typeof(PolygonOffset)
 				);
