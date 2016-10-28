@@ -457,15 +457,7 @@ namespace Microsoft.Xna.Framework
 			BeginRun();
 			_gameTimer = Stopwatch.StartNew();
 
-            try
-            {
-                Platform.RunLoop();
-            }
-            catch (Exception e)
-            {
-                // JSIL hack to show stack trace in browser
-                throw new Exception(e.StackTrace, e);
-            }
+            Platform.RunLoop();
 
             EndRun();
 			DoExiting();
