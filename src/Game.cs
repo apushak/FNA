@@ -267,15 +267,19 @@ namespace Microsoft.Xna.Framework
 
 		private TimeSpan _inactiveSleepTime = TimeSpan.FromSeconds(0.02);
 
-		private readonly TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
+#if JSIL
+        private readonly TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(2000);
+#else
+        private readonly TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
+#endif
 
-		private bool _suppressDraw;
+        private bool _suppressDraw;
 
 		private static Game _instance = null;
 
-		#endregion
+#endregion
 
-		#region Public Constructors
+#region Public Constructors
 
 		public Game()
 		{
@@ -292,18 +296,18 @@ namespace Microsoft.Xna.Framework
 			_services.AddService(typeof(GamePlatform), Platform);
 		}
 
-		#endregion
+#endregion
 
-		#region Deconstructor
+#region Deconstructor
 
 		~Game()
 		{
 			Dispose(false);
 		}
 
-		#endregion
+#endregion
 
-		#region IDisposable Implementation
+#region IDisposable Implementation
 
 		private bool _isDisposed;
 		public void Dispose()
@@ -379,18 +383,18 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region Events
+#region Events
 
 		public event EventHandler<EventArgs> Activated;
 		public event EventHandler<EventArgs> Deactivated;
 		public event EventHandler<EventArgs> Disposed;
 		public event EventHandler<EventArgs> Exiting;
 
-		#endregion
+#endregion
 
-		#region Public Methods
+#region Public Methods
 
 		public void Exit()
 		{
@@ -577,9 +581,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region Protected Methods
+#region Protected Methods
 
 		protected virtual bool BeginDraw()
 		{
@@ -673,9 +677,9 @@ namespace Microsoft.Xna.Framework
 			Raise(Deactivated, args);
 		}
 
-		#endregion
+#endregion
 
-		#region Event Handlers
+#region Event Handlers
 
 		private void Components_ComponentAdded(
 			object sender,
@@ -695,9 +699,9 @@ namespace Microsoft.Xna.Framework
 			DecategorizeComponent(e.GameComponent);
 		}
 
-		#endregion
+#endregion
 
-		#region Internal Methods
+#region Internal Methods
 
 		[Conditional("DEBUG")]
 		internal void Log(string Message)
@@ -764,9 +768,9 @@ namespace Microsoft.Xna.Framework
 			UnloadContent();
 		}
 
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 
 		private void CategorizeComponents()
 		{
@@ -832,9 +836,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region SortingFilteringCollection class
+#region SortingFilteringCollection class
 
 		/// <summary>
 		/// The SortingFilteringCollection class provides efficient, reusable
@@ -1110,9 +1114,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region AddJournalEntry struct
+#region AddJournalEntry struct
 
 		private struct AddJournalEntry<T>
 		{
@@ -1146,6 +1150,6 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		#endregion
+#endregion
 	}
 }

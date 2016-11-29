@@ -3,6 +3,7 @@ using JSIL.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Utilities;
@@ -184,6 +185,7 @@ namespace Fna.Platform {
             public Action         Exit;
             private dynamic       Window;
             private Action        _RunNextTick;
+            private Stopwatch Timer;
 
             public InnerLoopContext (
                 Func<bool> innerLoopTick, Action exit
@@ -191,12 +193,17 @@ namespace Fna.Platform {
                 _RunNextTick = RunNextTick;
                 InnerLoopTick = innerLoopTick;
                 Exit = exit;
+                Timer = new Stopwatch();
             }
 
             public void RunNextTick () {
+                Timer.Restart();
                 IsRunning = InnerLoopTick();
+                Timer.Stop();
                 if (IsRunning)
-                    Verbatim.Expression("window.requestAnimationFrame($0)", _RunNextTick);
+                    //Verbatim.Expression("window.requestAnimationFrame($0)", _RunNextTick);
+                    Verbatim.Expression("window.setTimeout($0, $1)", _RunNextTick,
+                        Math.Max(1f, 50f / 3f - Timer.ElapsedMilliseconds));
                 else
                     Exit();
             }
